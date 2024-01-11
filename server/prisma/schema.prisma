@@ -1,0 +1,20 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "sqlserver"
+    url      = env("DATABASE_URL")
+}
+
+model Usuario {
+    idUsuario       Int      @id @default(autoincrement())
+    createdAt       DateTime @default(now())
+    updatedAt       DateTime @updatedAt
+    nombreUsuario   String
+    apellidoUsuario String
+    emailUsuario    String   @unique
+    telefonoUsuario String
+    passwordUsuario String   @default("123456")
+    deleted         Boolean  @default(false)
+}
