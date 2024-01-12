@@ -14,8 +14,10 @@
   },
   "dependencies": {
     "@mdi/font": "^7.4.47",
+    "@types/socket.io-client": "^3.0.0",
     "axios": "^1.6.5",
     "pinia": "^2.1.7",
+    "socket.io-client": "^4.7.3",
     "sweetalert2": "^11.10.2",
     "vue": "^3.3.11",
     "vue-router": "^4.2.5",

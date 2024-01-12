@@ -62,6 +62,9 @@ import { api } from "@/service"; //Importo la instancia de axios
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 import Swal from "sweetalert2";
+// import { ioSocket } from "@/service"
+
+// const socket = ioSocket;
 
 
 const router = useRouter();
