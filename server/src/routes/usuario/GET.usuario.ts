@@ -1,8 +1,9 @@
 import app from '../../app';
 import { prisma } from "../../config/Prisma";
+import authenticateToken from '../../middleware/authenticateToken';
 
 // Endpoint para obtener todos los usuarios
-app.get("/usuario", async (req, res) => {
+app.get("/usuario", authenticateToken, async (req, res) => {
     try {
         const usuarios = await prisma.usuario.findMany();
         res.json(usuarios).status(200);

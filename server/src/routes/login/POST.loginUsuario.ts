@@ -1,6 +1,12 @@
 import app from '../../app';
 import { prisma } from "../../config/Prisma";
 import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
+import dotenv from 'dotenv';
+import { dot } from 'node:test/reporters';
+
+//Leo variables de entorno
+dotenv.config();
 
 app.post('/login', async (req, res) => {
     const { emailUsuario, passwordUsuario } = req.body;
@@ -23,9 +29,21 @@ app.post('/login', async (req, res) => {
         // Valido que la contraseña sea correcta
         if (!isMatch) {
             return res.status(404).json({ message: 'Usuario o contraseña incorrectos' });
+        } else {
+            const secret = process.env.ACCESS_TOKEN_SECRET;
+
+            //Verifico que la variable de entorno exista
+            if (!secret) {
+                throw new Error(
+                    "ACCESS_TOKEN_SECRET no está definido en las variables de entorno"
+                );
+            }
+
+            //Creo el token
+            const accessToken = jwt.sign({ emailUsuario: usuario.emailUsuario, idUsuario: usuario.idUsuario }, secret, { expiresIn: '24h' });
+            res.status(200).json({ accessToken });
         }
 
-        res.status(200).json({ message: 'Usuario logeado correctamente' });
 
     } catch (error) {
         console.log("Error al logearse:", error);

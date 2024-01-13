@@ -3,17 +3,16 @@ import { prisma } from "./config/Prisma";
 import "./routes" // Importa todas las rutas
 import { createServer } from 'http'
 import { Server } from "socket.io";
-//import io from './socketio';
 
-// Disable x-powered-by header
-app.disable('x-powered-by');
+
+
 
 //Creamos server http
 const server = createServer(app);
 
 //Creamos server socket.io
 const io = new Server(server, {
-    connectionStateRecovery: {},
+    //connectionStateRecovery: {},
     cors: {
         origin: "*",
         methods: ["GET", "POST"]
@@ -25,6 +24,13 @@ io.on('connection', (socket) => {
     console.log('Un usuario se ha conectado');
     socket.on('disconnect', () => {
         console.log('Un usuario se ha desconectado')
+    })
+
+    //Escucho el evento chat mensaje
+    socket.on('chat mensaje', (mensaje) => {
+
+        //Envio el mensaje a todos los clientes coenctados
+        io.emit('chat mensaje', mensaje);
     })
 })
 

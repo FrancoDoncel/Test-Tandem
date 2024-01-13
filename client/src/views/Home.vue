@@ -1,12 +1,15 @@
 <template>
     <v-container fluid class="pa-0 pa-md-3">
-        <v-app-bar :elevation="2" class="text-center">
+        <v-app-bar :elevation="2" class="d-flex align-center">
             <template v-slot:append>
-                <v-btn icon="mdi-logout" @click="redireccionarLogin"></v-btn>
+                <v-btn icon @click="redireccionarChat">
+                    <v-icon>mdi-chat-outline</v-icon>
+                </v-btn>
+                <v-btn icon @click="cerrarSesion">
+                    <v-icon>mdi-logout</v-icon>
+                </v-btn>
             </template>
-            <v-spacer></v-spacer>
-            <h1>Control clientes</h1>
-            <v-spacer></v-spacer>
+            <h1 class="text-center flex-grow-1">Control clientes</h1>
         </v-app-bar>
 
         <!-- Input de busqueda en la tabla -->
@@ -62,9 +65,6 @@ import { api } from "@/service"; //Importo la instancia de axios
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 import Swal from "sweetalert2";
-// import { ioSocket } from "@/service"
-
-// const socket = ioSocket;
 
 
 const router = useRouter();
@@ -78,8 +78,11 @@ async function pedirUsuarios() {
         const { data } = await api.get("/usuario",);
         usuariosDb.value = data;
         console.log(usuariosDb.value);
-    } catch (error) {
+    } catch (error: any) {
         console.log(error);
+        if (error.response || error.response.status === 401) {
+            redireccionarLogin();
+        }
     }
 }
 pedirUsuarios();
@@ -119,6 +122,11 @@ function alertaEliminarUsuarioDeBaseDeDatos(idUsuario: any) {
     });
 }
 
+//Funcion de cierre de sesion () redirecciona al login y limpia el localstorage)
+function cerrarSesion() {
+    localStorage.clear();
+    redireccionarLogin();
+}
 
 //Redireccionar a la paginad de login
 function redireccionarLogin() {
@@ -137,6 +145,10 @@ function redireccionarCrearUsuario() {
     router.push({ path: "/crear-editar-usuario" });
 }
 
+//Redireccionar a la pagina de chat
+function redireccionarChat() {
+    router.push({ path: "/chat_tandem" });
+}
 //Funcion para filtrar los usuarios
 function filtrarUsuarios(idUsuario: any) {
     usuariosDb.value = usuariosDb.value.filter((usuario) => usuario.idUsuario !== idUsuario);
@@ -151,3 +163,17 @@ const headers = [
     { title: "Editar/Eliminar", value: "accion" },
 ];
 </script>
+
+<style scoped>
+.d-flex {
+    display: flex;
+}
+
+.align-center {
+    align-items: center;
+}
+
+.flex-grow-1 {
+    flex-grow: 1;
+}
+</style>

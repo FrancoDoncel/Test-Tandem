@@ -56,6 +56,9 @@ async function iniciarSesion() {
             emailUsuario: emailUsuario.value,
             passwordUsuario: passwordUsuario.value
         });
+        console.log(data);
+        api.defaults.headers.common['Authorization'] = `Bearer ${data.accessToken}`;
+        localStorage.setItem("usuario", JSON.stringify(data));
         redireccionarHome();
     } catch (error) {
         console.log(error);
