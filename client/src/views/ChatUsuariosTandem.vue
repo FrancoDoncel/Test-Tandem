@@ -82,6 +82,26 @@ const conectarChat = () => {
 
     //Si el usuario esta logueado, conecto al chat
     socket.connect()
+    // Obtener el token de acceso desde el Local Storage
+    const accessToken = localStorage.getItem('usuario');
+
+    // Verificar si el token existe
+    if (accessToken) {
+        // Dividir el token en sus partes: encabezado, carga útil y firma
+        const [header, payload, signature] = accessToken.split('.');
+
+        // Decodificar la carga útil (payload)
+        const decodedPayload = atob(payload);
+
+        // Parsear la carga útil decodificada como un objeto JSON
+        const payloadObject = JSON.parse(decodedPayload);
+
+        // Ahora, 'payloadObject' contiene los datos que estaban encriptados en el token
+        console.log(payloadObject);
+    } else {
+        console.error('No se encontró el token de acceso en el Local Storage.');
+    }
+
 
     estadoDeConexion.value = true
 };
