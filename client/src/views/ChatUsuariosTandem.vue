@@ -35,7 +35,8 @@
         <v-container v-if="estadoDeConexion"
             style="height: 82vh; overflow: hidden; overflow-y: auto; scroll-behavior: smooth;" fluid class="pa-0 pa-md-3">
             <!-- Card de mensajes -->
-            <Card-mensaje v-for="(msg, index) of mensajes" :key="index" :mensaje="msg" class="mt-5"></Card-mensaje>
+            <Card-mensaje v-for="(msg, index) of mensajes" :key="index" :mensajeCompleto="msg"
+                :datosUsuarioLogueado="datosUsuarioLogueado" class="mt-5"></Card-mensaje>
         </v-container>
         <v-footer v-if="estadoDeConexion">
             <v-form class="w-100" @submit.prevent="enviarMensaje">
@@ -62,73 +63,123 @@ import { ref } from "vue";
 import CardMensaje from "@/components/CardMensaje.vue";
 import Swal from "sweetalert2";
 import { useRouter } from "vue-router";
+import { api } from "@/service";
 
 const router = useRouter();
 const mensajes = ref<any[]>([]);
 const mensaje = ref("");
 const estadoDeConexion = ref(false);
 const socket = ioSocket;
+const datosUsuarioLogueado = ref<any>({});
 
 const conectarChat = () => {
     //Verifico si hay un usuario logueado
     if (!localStorage.getItem("usuario")) {
-
         //Si no hay un usuario logueado, muestro un mensaje de error y redirecciono al login
-        alertaUsuarioNoLogueado()
+        alertaUsuarioNoLogueado();
 
         //Retorno para evitar que se conecte al chat
         return;
     }
-
     //Si el usuario esta logueado, conecto al chat
-    socket.connect()
-    // Obtener el token de acceso desde el Local Storage
+    socket.connect();
+
+    //Obtener el token de acceso desde el Local Storage
     const accessToken = localStorage.getItem('usuario');
 
-    // Verificar si el token existe
-    if (accessToken) {
-        // Dividir el token en sus partes: encabezado, carga útil y firma
-        const [header, payload, signature] = accessToken.split('.');
+    //Verifico si el token de acceso existe
+    verificarTokenUsuario(accessToken);
 
-        // Decodificar la carga útil (payload)
-        const decodedPayload = atob(payload);
+    //Pido mensajes en la base de datos
+    pedirMensajes();
 
-        // Parsear la carga útil decodificada como un objeto JSON
-        const payloadObject = JSON.parse(decodedPayload);
-
-        // Ahora, 'payloadObject' contiene los datos que estaban encriptados en el token
-        console.log(payloadObject);
-    } else {
-        console.error('No se encontró el token de acceso en el Local Storage.');
-    }
-
-
-    estadoDeConexion.value = true
+    estadoDeConexion.value = true;
 };
 const desconectarChat = () => {
-    socket.disconnect()
+    socket.disconnect();
     Swal.fire({
         icon: "success",
         title: "Desconectado",
         text: "Se ha desconectado del chat"
     }).then(() => {
-        //router.push("/");
         estadoDeConexion.value = false;
-    })
-
+    });
 };
 
 //Funcion para enviar un mensaje
 function enviarMensaje() {
-    socket.emit("chat mensaje", mensaje.value);
+    const mensajeCompleto = {
+        mensaje: mensaje.value,
+        emailUsuario: datosUsuarioLogueado.value.emailUsuario,
+        idUsuario: datosUsuarioLogueado.value.idUsuario,
+    }
+    socket.emit("chat mensaje", mensajeCompleto);
     mensaje.value = "";
 }
 
 //Funcion para recibir un mensaje
-socket.on("chat mensaje", (mensaje: any) => {
-    mensajes.value.push(mensaje);
+socket.on("chat mensaje", (mensajeCompleto: any) => {
+    //Guardo los mensajes en la base de datos
+    guardarMensajesEnBaseDeDatos(mensajeCompleto.mensaje, mensajeCompleto.idUsuario);
+    mensajes.value.push(mensajeCompleto);
 });
 
+
+//Funcion para verificar si el token de usuario existre
+function verificarTokenUsuario(accessToken: any) {
+    // Verifico si el token existe
+    if (accessToken) {
+        // Divido el token en sus partes
+        const [header, payload, signature] = accessToken.split('.');
+
+        // Decodifico el payload y lo parseo
+        datosUsuarioLogueado.value = JSON.parse(atob(payload));
+    } else {
+        console.error('No se encontró el token de acceso en el Local Storage.');
+    }
+}
+
+//Funcion para pedir los mensajes de la base de datos
+async function pedirMensajes() {
+    try {
+        const { data } = await api.get("/mensajesChat");
+        //Guardo los mensajes en el array de mensajes
+        data.forEach((mensaje: any) => {
+            guardarMensajesEnArray(mensaje.mensajeChat, mensaje.idUsuario, mensaje.Usuario.emailUsuario);
+        });
+    } catch (error: any) {
+        console.log(error);
+        if (error.response || error.response.status === 401) {
+            redireccionarLogin();
+        }
+    }
+}
+
+//Funcion para guardar los mensajes en la base de datos
+async function guardarMensajesEnBaseDeDatos(mensaje: any, idUsuario: any) {
+    try {
+        const { data } = await api.post("/mensajeChat", {
+            mensaje,
+            idUsuario,
+        });
+        console.log(data);
+    } catch (error: any) {
+        console.log(error);
+        if (error.response || error.response.status === 401) {
+            redireccionarLogin();
+        }
+    }
+}
+
+//Funcion para guardar los mensajes de la base de datos en el array de mensajes
+function guardarMensajesEnArray(mensaje: any, idUsuario: any, emailUsuario: any) {
+    const mensajeCompleto = {
+        mensaje,
+        idUsuario,
+        emailUsuario,
+    };
+    mensajes.value.push(mensajeCompleto);
+}
 
 //Configuracion alerta de usuario no logueado
 function alertaUsuarioNoLogueado() {
@@ -141,18 +192,17 @@ function alertaUsuarioNoLogueado() {
     })
 }
 
-//Redireccionar a la pagina de login
-function redireccionarLogin() {
-    router.push({ path: "/login" });
-}
-
 //Redireccionar a la pagina de home
 function redireccionarHome() {
     router.push({ path: "/" });
 }
 
-</script>
+//Redireccionar a la paginad de login
+function redireccionarLogin() {
+    router.push({ path: "/login" });
+}
 
+</script>
 
 <style scoped>
 .d-flex {

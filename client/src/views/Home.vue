@@ -98,8 +98,11 @@ async function eliminarUsuario(idUsuario: any) {
         console.log(data);
         //Actualizar la lista de usuarios
         filtrarUsuarios(idUsuario);
-    } catch (error) {
+    } catch (error: any) {
         console.log(error);
+        if (error.response || error.response.status === 401) {
+            redireccionarLogin();
+        }
     }
 }
 

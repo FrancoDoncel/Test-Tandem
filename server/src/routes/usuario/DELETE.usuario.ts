@@ -1,8 +1,9 @@
 import app from '../../app';
 import { prisma } from "../../config/Prisma";
+import authenticateToken from '../../middleware/authenticateToken';
 
 // Endpoint para eliminar un usuario
-app.delete("/usuario", async (req, res) => {
+app.delete("/usuario", authenticateToken, async (req, res) => {
 
     try {
         const { idUsuario } = req.body;

@@ -4,9 +4,10 @@ import bcrypt from 'bcrypt';
 import RequestExtend from '../../config/Request';
 import validator from '../../middleware/validator';
 import verificarPassword from '../../middleware/verificarPassword';
+import authenticateToken from '../../middleware/authenticateToken';
 
 //Endpoint para actualizar un usuario
-app.put("/usuario", validator, verificarPassword, async (req: RequestExtend, res: any) => {
+app.put("/usuario", authenticateToken, validator, verificarPassword, async (req: RequestExtend, res: any) => {
     try {
         let { idUsuario, nombreUsuario, apellidoUsuario, emailUsuario, telefonoUsuario, passwordUsuario } = req.body;
 

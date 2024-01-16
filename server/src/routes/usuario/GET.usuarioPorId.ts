@@ -1,8 +1,9 @@
 import app from '../../app';
 import { prisma } from "../../config/Prisma";
+import authenticateToken from '../../middleware/authenticateToken';
 
 // Endpoint para obtener un usuario por su id
-app.get("/usuario/:idUsuario", async (req, res) => {
+app.get("/usuario/:idUsuario", authenticateToken, async (req, res) => {
     try {
         const { idUsuario } = req.params; //Obtengo el id del usuario por la url
         const usuario = await prisma.usuario.findUnique({

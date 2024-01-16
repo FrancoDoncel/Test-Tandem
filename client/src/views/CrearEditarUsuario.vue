@@ -90,8 +90,11 @@ async function buscarUsuarioPorId() {
     try {
         const { data } = await api.get(`/usuario/${idUsuarioParaActualizar}`);
         actualizarVariablesUsuario(data);
-    } catch (error) {
+    } catch (error: any) {
         console.log(error);
+        if (error.response || error.response.status === 401) {
+            redireccionarLogin();
+        }
     }
 }
 
@@ -112,6 +115,9 @@ async function crearUsuario() {
         console.log(data);
         return status;
     } catch (error: any) {
+        if (error.response || error.response.status === 401) {
+            redireccionarLogin();
+        }
         console.log(error);
         return error.response.status;
     }
@@ -135,6 +141,9 @@ async function actualizarUsuario() {
         console.log(data);
         return status;
     } catch (error: any) {
+        if (error.response || error.response.status === 401) {
+            redireccionarLogin();
+        }
         console.log(error);
         return error.response.status;
     }
@@ -224,4 +233,9 @@ function validarDatosDelFormulario() {
 function redireccionarHome() {
     router.push({ path: "/" });
 }
+//Redireccionar a la paginad de login
+function redireccionarLogin() {
+    router.push({ path: "/login" });
+}
+
 </script>

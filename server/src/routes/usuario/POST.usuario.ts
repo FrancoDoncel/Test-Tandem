@@ -2,10 +2,11 @@ import app from '../../app';
 import { prisma } from "../../config/Prisma";
 import bcrypt from 'bcrypt';
 import validator from "../../middleware/validator";
+import authenticateToken from '../../middleware/authenticateToken';
 
 
 //Endpoint para crear un usuario nuevo
-app.post('/usuario', validator, async (req, res) => {
+app.post('/usuario', authenticateToken, validator, async (req, res) => {
     try {
         const { nombreUsuario, apellidoUsuario, emailUsuario, telefonoUsuario, passwordUsuario } = req.body;
 

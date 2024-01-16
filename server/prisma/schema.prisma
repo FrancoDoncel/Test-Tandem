@@ -8,13 +8,24 @@ datasource db {
 }
 
 model Usuario {
-    idUsuario       Int      @id @default(autoincrement())
-    createdAt       DateTime @default(now())
-    updatedAt       DateTime @updatedAt
+    idUsuario       Int            @id @default(autoincrement())
+    createdAt       DateTime       @default(now())
+    updatedAt       DateTime       @updatedAt
     nombreUsuario   String
     apellidoUsuario String
-    emailUsuario    String   @unique
+    emailUsuario    String         @unique
     telefonoUsuario String
-    passwordUsuario String   @default("123456")
-    deleted         Boolean  @default(false)
+    passwordUsuario String         @default("123456")
+    deleted         Boolean        @default(false)
+    mensajesChat    MensajesChat[]
+}
+
+model MensajesChat {
+    idMensajeChat Int      @id @default(autoincrement())
+    createdAt     DateTime @default(now())
+    updatedAt     DateTime @updatedAt
+    mensajeChat   String
+    deleted       Boolean  @default(false)
+    idUsuario     Int
+    Usuario       Usuario  @relation(fields: [idUsuario], references: [idUsuario])
 }

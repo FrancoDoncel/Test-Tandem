@@ -1,14 +1,16 @@
 <template>
-    <v-card width="300" class="mb-3 ml-5" color="success" theme="dark">
+    <v-card width="300" :class="mensajeCompleto.emailUsuario === datosUsuarioLogueado.emailUsuario && 'ml-auto'"
+        :color="mensajeCompleto.emailUsuario === datosUsuarioLogueado.emailUsuario ? 'success' : '#555'" theme="dark">
         <v-card-subtitle>
-            Franco
+            {{ mensajeCompleto.emailUsuario }}
         </v-card-subtitle>
         <v-card-text>
-            {{ mensaje }}
+            {{ mensajeCompleto.mensaje }}
         </v-card-text>
     </v-card>
 </template>
 
 <script setup lang="ts">
-defineProps(["mensaje"])
+defineProps(["mensajeCompleto", "datosUsuarioLogueado"]);
+
 </script>

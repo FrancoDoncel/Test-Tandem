@@ -4,9 +4,6 @@ import "./routes" // Importa todas las rutas
 import { createServer } from 'http'
 import { Server } from "socket.io";
 
-
-
-
 //Creamos server http
 const server = createServer(app);
 
