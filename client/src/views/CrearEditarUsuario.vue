@@ -72,6 +72,11 @@ const telefonoUsuario = ref("");
 const emailUsuario = ref("");
 const passwordUsuario = ref("");
 
+//Verifico si hay accestoken en el Local Storage, sino redirecciono al login
+if (!localStorage.getItem("usuario")) {
+    redireccionarLogin();
+}
+
 //Verificar si hay informacion de usuario en la query, para saber si es crear o editar
 function verificarInfoUsuario() {
     if (idUsuarioParaActualizar) {

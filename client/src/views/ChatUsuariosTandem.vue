@@ -72,6 +72,11 @@ const estadoDeConexion = ref(false);
 const socket = ioSocket;
 const datosUsuarioLogueado = ref<any>({});
 
+//Verifico si hay accestoken en el Local Storage, sino redirecciono al login
+if (!localStorage.getItem("usuario")) {
+    redireccionarLogin();
+}
+
 const conectarChat = () => {
     //Verifico si hay un usuario logueado
     if (!localStorage.getItem("usuario")) {
@@ -144,9 +149,15 @@ async function pedirMensajes() {
     try {
         const { data } = await api.get("/mensajesChat");
         //Guardo los mensajes en el array de mensajes
-        data.forEach((mensaje: any) => {
-            guardarMensajesEnArray(mensaje.mensajeChat, mensaje.idUsuario, mensaje.Usuario.emailUsuario);
+        const mensajesCompletos = data.map((mensaje: any) => {
+            return {
+                mensaje: mensaje.mensajeChat,
+                idUsuario: mensaje.idUsuario,
+                emailUsuario: mensaje.Usuario.emailUsuario,
+            };
         });
+        mensajes.value = mensajesCompletos;
+
     } catch (error: any) {
         console.log(error);
         if (error.response || error.response.status === 401) {
@@ -169,16 +180,6 @@ async function guardarMensajesEnBaseDeDatos(mensaje: any, idUsuario: any) {
             redireccionarLogin();
         }
     }
-}
-
-//Funcion para guardar los mensajes de la base de datos en el array de mensajes
-function guardarMensajesEnArray(mensaje: any, idUsuario: any, emailUsuario: any) {
-    const mensajeCompleto = {
-        mensaje,
-        idUsuario,
-        emailUsuario,
-    };
-    mensajes.value.push(mensajeCompleto);
 }
 
 //Configuracion alerta de usuario no logueado
